@@ -34,7 +34,7 @@ android {
         jvmTarget = '1.8'
     }
     buildFeatures {
-        dataBinding true
+        viewBinding true
     }
 }
 
@@ -57,4 +57,15 @@ dependencies {
     // Core with Ktx
     implementation "androidx.core:core-ktx:$version_core"
     implementation 'androidx.appcompat:appcompat:1.5.1'
+
+    // Retrofit2
+    implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
+    implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
+
+    // Gson
+    implementation "com.squareup.retrofit2:converter-gson:$version_retrofit"
+    implementation 'com.google.code.gson:gson:2.10'
+
+    // Interceptor
+    implementation "com.squareup.okhttp3:logging-interceptor:4.10.0"
 }
