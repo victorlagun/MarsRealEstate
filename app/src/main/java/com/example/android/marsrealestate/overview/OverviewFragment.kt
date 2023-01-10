@@ -25,7 +25,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.android.marsrealestate.R
 import com.example.android.marsrealestate.databinding.FragmentOverviewBinding
-import com.example.android.marsrealestate.network.ApiService
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 
@@ -34,17 +33,6 @@ import kotlinx.coroutines.flow.collect
  */
 class OverviewFragment : Fragment() {
 
-    /**
-     * Lazily initialize our [OverviewViewModel].
-     */
-    private val viewModel: OverviewViewModel by lazy {
-        ViewModelProvider(this).get(OverviewViewModel::class.java)
-    }
-
-    /**
-     * Inflates the layout with Data Binding, sets its lifecycle owner to the OverviewFragment
-     * to enable Data Binding to observe LiveData, and sets up the RecyclerView with an adapter.
-     */
     @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,6 +40,12 @@ class OverviewFragment : Fragment() {
     ): View? {
         val binding = FragmentOverviewBinding.inflate(inflater)
 
+        val viewModelFactory = OverviewViewModelFactory(requireContext().applicationContext)
+
+        val viewModel =
+            ViewModelProvider(
+                this, viewModelFactory
+            )[OverviewViewModel::class.java]
 //        lifecycleScope.launchWhenCreated {
 //            binding.textView.text =
 //                "Success: ${ApiService.service.loadData().size} Mars properties retrieved"
@@ -61,7 +55,7 @@ class OverviewFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.response
                 .catch { e -> e.message }
-                .collect{binding.textView.text = it}
+                .collect { binding.textView.text = it }
         }
 
 //        viewModel.response.observe(viewLifecycleOwner) {

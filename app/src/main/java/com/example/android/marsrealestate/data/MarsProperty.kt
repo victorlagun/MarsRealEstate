@@ -25,4 +25,11 @@ data class MarsProperty(
     val type: String,
     @SerializedName("img_src")
     val imgSrc: String,
-)
+) {
+    fun toEntity() = com.example.android.marsrealestate.db.MarsProperty(
+        id = this.id,
+        price = this.price,
+        type = this.type,
+        imgSrc = this.imgSrc
+    )
+}

@@ -17,20 +17,23 @@
 
 package com.example.android.marsrealestate.overview
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.android.marsrealestate.db.MarsPropertiesDatabase
 import com.example.android.marsrealestate.network.ApiService
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
-import kotlinx.coroutines.async
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 /**
  * The [ViewModel] that is attached to the [OverviewFragment].
  */
-class OverviewViewModel : ViewModel() {
+class OverviewViewModel(private val appContext: Context) : ViewModel() {
 
     private lateinit var disposable: Disposable
 
@@ -76,38 +79,29 @@ class OverviewViewModel : ViewModel() {
     private fun getMarsRealEstateProperties() {
         try {
             viewModelScope.launch {
-                val def = async {
-                    "Success: ${ApiService.service.loadData().size} Mars properties retrieved"
+                withContext(Dispatchers.IO) {
+                    MarsPropertiesDatabase.getInstance(appContext).dao()
+                        .insert(ApiService.service.loadData().map { it.toEntity() })
+                    MarsPropertiesDatabase.getInstance(appContext).dao().getAll()
+                        .collect { _response.value = it.toString() }
                 }
-                _response.emit(def.await())
             }
         } catch (e: Exception) {
             _response.value = "Failure: ${e.message}"
         }
 
-        try {
-            with(viewModelScope) {
-                val def = async {
-                    "Success: ${ApiService.service.loadData().size} Mars properties retrieved"
-                }
-                launch { _response.emit(def.await()) }
-            }
-        } catch (e: Exception) {
-            _response.value = "Failure: ${e.message}"
-        }
-
-        try {
-            viewModelScope.launch {
-                val deferred = viewModelScope.async {
-                    firstFlow().zip(secondFlow) { first, second -> Pair(first, second) }
-                        .reduce { a, b -> Pair(a.first, b.second) }
-
-                }
-                _response.value = deferred.await().toString()
-            }
-        } catch (e: Exception) {
-            _response.value = "Failure: ${e.message}"
-        }
+//        try {
+//            viewModelScope.launch {
+//                val deferred = viewModelScope.async {
+//                    firstFlow().zip(secondFlow) { first, second -> Pair(first, second) }
+//                        .reduce { a, b -> Pair(a.first, b.second) }
+//
+//                }
+//                _response.value = deferred.await().toString()
+//            }
+//        } catch (e: Exception) {
+//            _response.value = "Failure: ${e.message}"
+//        }
 
 
 //        disposable =
